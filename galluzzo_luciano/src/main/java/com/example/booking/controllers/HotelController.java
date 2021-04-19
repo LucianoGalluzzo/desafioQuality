@@ -27,16 +27,27 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
+    /*
+    In this endpoint you can get the list of every hotels or one filtered list indicating dateFrom, dateTo
+    and destination
+     */
     @GetMapping("/hotels")
-    public ResponseEntity<List<HotelDTO>> getHotels(@RequestParam Map<String, String> params) throws IOException, DateFormatException, InexistentDestinationException, MissingFiledsInSearchHotelException, EmptySearchException, WrongIntervalDateException {
+    public ResponseEntity<List<HotelDTO>> getHotels(@RequestParam Map<String, String> params) throws IOException, DateFormatException, InexistentDestinationException, MissingFieldsInSearchHotelException, EmptySearchHotelException, WrongIntervalDateException {
         return new ResponseEntity<List<HotelDTO>>(hotelService.getHotels(params), HttpStatus.OK);
     }
 
+    /*
+    In this endpoint you can book a room indicating a Payload with book information (see README.md for details)
+    The response will be your book and this will be indicated as "Booked" in database
+     */
     @PostMapping("/booking")
     public ResponseEntity<HotelBookingResponseDTO> book(@RequestBody HotelPayloadDTO payload) throws DateFormatException, InvalidRoomAmountException, InvalidRoomException, InexistentDestinationException, BookingErrorException, InvalidEmailException, InvalidPaymentMethodException, IOException, WrongIntervalDateException, InexistentHotelErrorException {
         return new ResponseEntity<HotelBookingResponseDTO>(hotelService.booking(payload), HttpStatus.OK);
     }
 
+    /*
+    In this section of code I handle the exceptions to return a detailed ErrorDTO in each case
+     */
     @ExceptionHandler(value={BookingErrorException.class})
     public ResponseEntity<ErrorDTO> bookingErrorException(Exception e){
         ErrorDTO errorDTO = new ErrorDTO("Booking error", e.getMessage());
@@ -49,7 +60,7 @@ public class HotelController {
         return new ResponseEntity<>(errorDTO, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value={EmptySearchException.class})
+    @ExceptionHandler(value={EmptySearchHotelException.class})
     public ResponseEntity<ErrorDTO> emptySearchException(Exception e){
         ErrorDTO errorDTO = new ErrorDTO("No results", e.getMessage());
         return new ResponseEntity<>(errorDTO, HttpStatus.BAD_REQUEST);
@@ -91,7 +102,7 @@ public class HotelController {
         return new ResponseEntity<>(errorDTO, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value={MissingFiledsInSearchHotelException.class})
+    @ExceptionHandler(value={MissingFieldsInSearchHotelException.class})
     public ResponseEntity<ErrorDTO> missingFiledsInSearchException(Exception e){
         ErrorDTO errorDTO = new ErrorDTO("Missing fields", e.getMessage());
         return new ResponseEntity<>(errorDTO, HttpStatus.BAD_REQUEST);

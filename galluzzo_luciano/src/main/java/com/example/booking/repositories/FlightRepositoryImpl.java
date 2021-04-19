@@ -1,10 +1,8 @@
 package com.example.booking.repositories;
 
-import com.example.booking.config.EmptySearchException;
+import com.example.booking.config.EmptySearchFlightException;
 import com.example.booking.config.InexistentFlightErrorException;
-import com.example.booking.config.InexistentHotelErrorException;
 import com.example.booking.dtos.FlightDTO;
-import com.example.booking.dtos.HotelDTO;
 import com.example.booking.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -75,7 +73,7 @@ public class FlightRepositoryImpl implements FlightRepository{
     }
 
     @Override
-    public List<FlightDTO> getFlightsFiltered(LocalDate dateFrom, LocalDate dateTo, String origin, String destination) throws IOException, EmptySearchException {
+    public List<FlightDTO> getFlightsFiltered(LocalDate dateFrom, LocalDate dateTo, String origin, String destination) throws IOException, EmptySearchFlightException {
         loadDataBase();
         List<FlightDTO> filteredList = new ArrayList<>();
         filteredList = dataBase.stream().filter(flightDTO -> flightDTO.getDestination().equalsIgnoreCase(destination)
@@ -84,7 +82,7 @@ public class FlightRepositoryImpl implements FlightRepository{
                 && !dateTo.isAfter(DateUtil.convertToDate(flightDTO.getDateTo()))).
                 collect(Collectors.toList());
         if(filteredList.isEmpty())
-            throw new EmptySearchException();
+            throw new EmptySearchFlightException();
         return filteredList;
     }
 

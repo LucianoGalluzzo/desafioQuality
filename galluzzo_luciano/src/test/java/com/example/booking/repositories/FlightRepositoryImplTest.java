@@ -1,7 +1,8 @@
 package com.example.booking.repositories;
 
+import com.example.booking.config.EmptySearchFlightException;
+import com.example.booking.config.InexistentFlightErrorException;
 import com.example.booking.dtos.FlightDTO;
-import com.example.booking.dtos.HotelDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 public class FlightRepositoryImplTest {
@@ -26,11 +28,76 @@ public class FlightRepositoryImplTest {
 
     @Test
     void getAllTest() throws IOException {
-        List<FlightDTO> mockHotels = objectMapper.readValue(
+        List<FlightDTO> mockFlights = objectMapper.readValue(
                 new File("src/test/resources/testFlights.json"),
                 new TypeReference<>() {
                 });
 
-        Assertions.assertEquals(mockHotels, flightRepository.getAll());
+        Assertions.assertEquals(mockFlights, flightRepository.getAll());
+    }
+
+    @Test
+    void getFlightsFilteredTest() throws IOException, EmptySearchFlightException {
+        List<FlightDTO> mockFlights = objectMapper.readValue(
+                new File("src/test/resources/testFlightsFiltered.json"),
+                new TypeReference<>() {
+                });
+        LocalDate dateFrom = LocalDate.of(2021, 02, 10);
+        LocalDate dateTo = LocalDate.of(2021, 02, 15);
+        String origin = "Buenos Aires";
+        String destination = "Puerto Iguazú";
+        Assertions.assertEquals(mockFlights, flightRepository.getFlightsFiltered(dateFrom, dateTo, origin, destination));
+    }
+
+    @Test
+    void getFlightsNoResultsTest(){
+        LocalDate dateFrom = LocalDate.of(2021, 02, 10);
+        LocalDate dateTo = LocalDate.of(2021, 02, 15);
+        String origin = "Buenos Aires";
+        String destination = "Montevideo";
+
+        Exception exception = Assertions.assertThrows(EmptySearchFlightException.class, () -> {
+            flightRepository.getFlightsFiltered(dateFrom, dateTo, origin, destination);
+        });
+
+        String expectedMessage = "No flights available for that route between that dates";
+        String actualMessage = exception.getMessage();
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
+
+    }
+
+    @Test
+    void destinationExistTest() throws IOException {
+
+        Assertions.assertTrue(flightRepository.destinationExist("Buenos Aires"));
+    }
+
+    @Test
+    void destinationNoExistTest() throws IOException {
+
+        Assertions.assertFalse(flightRepository.destinationExist("Montevideo"));
+    }
+
+    @Test
+    void getFlightByCodAndRouteTest() throws IOException, InexistentFlightErrorException {
+        FlightDTO mockFlight = new FlightDTO("BAPI-1235", "Buenos Aires", "Puerto Iguazú", "Economy", 6500, "10/02/2021",
+                "15/02/2021");
+        FlightDTO responseFlight = flightRepository.getFlightByNumberAndRoute("BAPI-1235","Buenos Aires", "Puerto Iguazú");
+        Assertions.assertEquals(mockFlight, responseFlight);
+    }
+
+    @Test
+    void flightNotExistedException(){
+        String number = "XXXX-1235";
+        String origin = "Buenos Aires";
+        String destination = "Montevideo";
+        Exception exception = Assertions.assertThrows(InexistentFlightErrorException.class, () -> {
+            flightRepository.getFlightByNumberAndRoute(number, origin, destination);
+        });
+
+        String expectedMessage = "Flight with code '" + number + "' from '" + origin + "' to '" + destination
+                + "' doesn´t exist in database";
+        String actualMessage = exception.getMessage();
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 }

@@ -11,12 +11,10 @@ public interface FlightService {
 
     List<FlightDTO> getAllFlights() throws IOException;
     void validateParams(Map<String, String> params) throws DateFormatException, WrongIntervalDateException, IOException, InexistentDestinationException, MissingFieldsInSearchFlightException;
-    List<FlightDTO> getFlights(Map<String, String> params) throws IOException, DateFormatException, InexistentDestinationException, WrongIntervalDateException, EmptySearchException, MissingFieldsInSearchFlightException;
-    FlightReservationResponseDTO booking(FlightPayloadDTO payload) throws InvalidRoomException, DateFormatException, InvalidEmailException, WrongIntervalDateException, InvalidPaymentMethodException, InvalidRoomAmountException, InexistentDestinationException, IOException, InexistentHotelErrorException, BookingErrorException, InexistentFlightErrorException, FlightReservationErrorException;
+    List<FlightDTO> getFlights(Map<String, String> params) throws IOException, DateFormatException, InexistentDestinationException, WrongIntervalDateException, MissingFieldsInSearchFlightException, EmptySearchFlightException;
+    FlightReservationResponseDTO booking(FlightPayloadDTO payload) throws InvalidRoomException, DateFormatException, InvalidEmailException, WrongIntervalDateException, InvalidPaymentMethodException, InvalidRoomAmountException, InexistentDestinationException, IOException, BookingErrorException, InexistentFlightErrorException, FlightReservationErrorException;
     void validatePayload(FlightPayloadDTO payload) throws DateFormatException, WrongIntervalDateException, IOException, InexistentDestinationException, InvalidRoomException, InvalidRoomAmountException, InvalidEmailException, InvalidPaymentMethodException;
-    void interestValidation(String type, int dues) throws InvalidPaymentMethodException;
-    double calculatePrice(FlightPayloadDTO payload) throws IOException, InexistentHotelErrorException, InexistentFlightErrorException;
-    double calculateInterest(PaymentMethodDTO paymentMethod);
-    void checkBooking(FlightPayloadDTO payload) throws IOException, InexistentHotelErrorException, BookingErrorException, FlightReservationErrorException, InexistentFlightErrorException;
+    double calculatePrice(FlightPayloadDTO payload) throws IOException, InexistentFlightErrorException;
+    void checkBooking(FlightPayloadDTO payload) throws IOException, BookingErrorException, FlightReservationErrorException, InexistentFlightErrorException;
 
 }

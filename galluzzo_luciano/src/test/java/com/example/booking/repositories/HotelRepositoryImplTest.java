@@ -1,21 +1,18 @@
 package com.example.booking.repositories;
 
-import com.example.booking.config.EmptySearchException;
+import com.example.booking.config.EmptySearchHotelException;
 import com.example.booking.config.InexistentHotelErrorException;
 import com.example.booking.dtos.HotelDTO;
-import com.example.booking.utils.DateUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.mockito.Mock;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 public class HotelRepositoryImplTest {
@@ -40,7 +37,7 @@ public class HotelRepositoryImplTest {
     }
 
     @Test
-    void getHotelsFilteredTest() throws IOException, EmptySearchException {
+    void getHotelsFilteredTest() throws IOException, EmptySearchHotelException {
         List<HotelDTO> mockHotels = objectMapper.readValue(
                 new File("src/test/resources/testHotelsFiltered.json"),
                 new TypeReference<>() {
@@ -57,7 +54,7 @@ public class HotelRepositoryImplTest {
         LocalDate dateTo = LocalDate.of(2021, 03, 02);
         String destination = "Buenos Aires";
 
-        Exception exception = Assertions.assertThrows(EmptySearchException.class, () -> {
+        Exception exception = Assertions.assertThrows(EmptySearchHotelException.class, () -> {
             hotelRepository.getHotelsFiltered(dateFrom, dateTo, destination);
         });
 

@@ -1,6 +1,7 @@
 package com.example.booking.services;
 
 import com.example.booking.config.*;
+import com.example.booking.dtos.HotelBookingResponseDTO;
 import com.example.booking.dtos.HotelDTO;
 import com.example.booking.dtos.HotelPayloadDTO;
 import com.example.booking.dtos.PaymentMethodDTO;
@@ -15,11 +16,11 @@ import org.mockito.Mock;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class HotelServiceImplTest {
@@ -44,11 +45,45 @@ public class HotelServiceImplTest {
     }
 
     @Test
+    void getAllHotels() throws IOException, InexistentDestinationException, MissingFieldsInSearchHotelException, DateFormatException, WrongIntervalDateException, EmptySearchHotelException {
+        List<HotelDTO> mockHotels=
+                objectMapper.readValue(new File("src/test/resources/testHotels.json"),
+                        new TypeReference<>() {
+                        });
+
+        when(hotelRepository.getAll()).thenReturn(mockHotels);
+
+        List<HotelDTO> responseHotels = hotelService.getHotels(new HashMap<>());
+
+        Assertions.assertEquals(mockHotels, responseHotels);
+    }
+
+    @Test
+    void getHotelsByParamsTest() throws IOException, InexistentDestinationException, MissingFieldsInSearchHotelException, DateFormatException, WrongIntervalDateException, EmptySearchHotelException {
+        List<HotelDTO> mockHotels=
+                objectMapper.readValue(new File("src/test/resources/testHotelsFiltered.json"),
+                        new TypeReference<>() {
+                        });
+
+        Map<String, String> mockParams = new HashMap<>();
+        mockParams.put("dateFrom", "10/02/2021");
+        mockParams.put("dateTo", "19/03/2021");
+        mockParams.put("destination", "Buenos Aires");
+
+        when(hotelRepository.getHotelsFiltered(any(), any(), any())).thenReturn(mockHotels);
+        when(hotelRepository.destinationExist(any())).thenReturn(true);
+
+        List<HotelDTO> responseHotels = hotelService.getHotels(mockParams);
+
+        Assertions.assertEquals(mockHotels, responseHotels);
+    }
+
+    @Test
     void validateParamsMissingFieldsTest(){
 
         Map<String,String> mockParams = new HashMap<>();
         mockParams.put("dateFrom", "20/02/2021");
-        Exception exception = Assertions.assertThrows(MissingFiledsInSearchHotelException.class, () -> {
+        Exception exception = Assertions.assertThrows(MissingFieldsInSearchHotelException.class, () -> {
             hotelService.validateParams(mockParams);
         });
 
@@ -117,63 +152,9 @@ public class HotelServiceImplTest {
     }
 
     @Test
-    void calculateInterest5PercentTest(){
-        PaymentMethodDTO mockPaymentMethod = new PaymentMethodDTO("CREDIT", "1234-1234-1234-1234", 3);
-        Assertions.assertEquals(0.05, hotelService.calculateInterest(mockPaymentMethod));
-    }
-
-    @Test
-    void calculateInterest10PercentTest(){
-        PaymentMethodDTO mockPaymentMethod = new PaymentMethodDTO("CREDIT", "1234-1234-1234-1234", 6);
-        Assertions.assertEquals(0.1, hotelService.calculateInterest(mockPaymentMethod));
-    }
-
-    @Test
-    void calculateInterest15PercentTest(){
-        PaymentMethodDTO mockPaymentMethod = new PaymentMethodDTO("CREDIT", "1234-1234-1234-1234", 9);
-        Assertions.assertEquals(0.15, hotelService.calculateInterest(mockPaymentMethod));
-    }
-
-    @Test
-    void calculateInterest20PercentTest(){
-        PaymentMethodDTO mockPaymentMethod = new PaymentMethodDTO("CREDIT", "1234-1234-1234-1234", 18);
-        Assertions.assertEquals(0.2, hotelService.calculateInterest(mockPaymentMethod));
-    }
-
-    @Test
     void calculatePriceTest() throws IOException, InexistentHotelErrorException {
         when(hotelRepository.getHotelByCodAndDestination(any(), any())).thenReturn(hotelFixture());
         Assertions.assertEquals(81900, hotelService.calculatePrice(mockPayload));
-    }
-
-    @Test
-    void validatePaymentMethodInvalidCardTypeTest(){
-        String type = "OTHER";
-        int dues = 1;
-
-        Exception exception = Assertions.assertThrows(InvalidPaymentMethodException.class, () -> {
-            hotelService.interestValidation(type, dues);
-        });
-
-        String expectedMessage = "'" + type + "' is not a valid payment method";
-        String actualMessage = exception.getMessage();
-        Assertions.assertTrue(actualMessage.contains(expectedMessage));
-
-    }
-
-    @Test
-    void validatePaymentMethodInvalidDuesNumberTest(){
-        String type = "DEBIT";
-        int dues = 3;
-
-        Exception exception = Assertions.assertThrows(InvalidPaymentMethodException.class, () -> {
-            hotelService.interestValidation(type, dues);
-        });
-
-        String expectedMessage = type + " card doesn´t allow " + String.valueOf(dues) + " dues";
-        String actualMessage = exception.getMessage();
-        Assertions.assertTrue(actualMessage.contains(expectedMessage));
-
     }
 
     @Test
@@ -204,9 +185,24 @@ public class HotelServiceImplTest {
     }
 
     @Test
-    void validatePayloadInvalidEmailTest() throws IOException {
+    void validatePayloadInvalidUserNameEmailTest() throws IOException {
         String mockEmail = "lucianogalluzzomercadolibre.com";
         mockPayload.setUserName(mockEmail);
+
+        when(hotelRepository.destinationExist(any())).thenReturn(true);
+        Exception exception = Assertions.assertThrows(InvalidEmailException.class, () -> {
+            hotelService.validatePayload(mockPayload);
+        });
+
+        String expectedMessage = "Some emails are invalid. Please enter valid emails";
+        String actualMessage = exception.getMessage();
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void validatePayloadInvalidPeopleEmailTest() throws IOException {
+        String mockEmail = "lucianogalluzzomercadolibre.com";
+        mockPayload.getBooking().getPeople().get(0).setMail(mockEmail);
 
         when(hotelRepository.destinationExist(any())).thenReturn(true);
         Exception exception = Assertions.assertThrows(InvalidEmailException.class, () -> {
@@ -235,9 +231,31 @@ public class HotelServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @Test
+    void bookingHotelTest() throws IOException, InexistentHotelErrorException, InvalidEmailException, DateFormatException, InvalidRoomAmountException, WrongIntervalDateException, InvalidPaymentMethodException, InexistentDestinationException, InvalidRoomException, BookingErrorException {
+
+        HotelBookingResponseDTO mockResponse =
+                objectMapper.readValue(new File("src/test/resources/testHotelResponse.json"),
+                new TypeReference<>() {
+                });
+
+        when(hotelRepository.getHotelByCodAndDestination(any(), any())).thenReturn(hotelFixtureToTestBooking());
+        doNothing().when(hotelRepository).setReservation(any());
+        when(hotelRepository.destinationExist(any())).thenReturn(true);
+
+        HotelBookingResponseDTO hotelBookingResponse = hotelService.booking(mockPayload);
+
+        Assertions.assertEquals(mockResponse, hotelBookingResponse);
+    }
+
     HotelDTO hotelFixture(){
         return new HotelDTO("CH-0002", "Cataratas Hotel", "Puerto Iguazú", "Double", 6300, "10/02/2021",
                 "20/03/2021", false);
+    }
+
+    HotelDTO hotelFixtureToTestBooking(){
+        return new HotelDTO("HB-0001", "Hotel Bristol", "Buenos Aires", "Single", 5435, "10/02/2021",
+                "19/03/2021", false);
     }
 
     HotelDTO hotelFixtureAlreadyBooked(){

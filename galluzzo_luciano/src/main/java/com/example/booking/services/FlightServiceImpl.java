@@ -5,6 +5,7 @@ import com.example.booking.dtos.*;
 import com.example.booking.repositories.FlightRepository;
 import com.example.booking.utils.DateUtil;
 import com.example.booking.utils.EmailUtil;
+import com.example.booking.utils.InterestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +25,13 @@ public class FlightServiceImpl implements FlightService {
         this.flightRepository = flightRepository;
     }
 
+    /*
+    This method receives the params in a Hashmap, is there aren´t any param, calls to a method which return the
+    whole flight list, if there are some param, calls to a method to validate the params and then obtains the
+    filtered list
+     */
     @Override
-    public List<FlightDTO> getFlights(Map<String, String> params) throws IOException, DateFormatException, InexistentDestinationException, WrongIntervalDateException, EmptySearchException, MissingFieldsInSearchFlightException {
+    public List<FlightDTO> getFlights(Map<String, String> params) throws IOException, DateFormatException, InexistentDestinationException, WrongIntervalDateException, MissingFieldsInSearchFlightException, EmptySearchFlightException {
 
         if(params.size() == 0)
             return getAllFlights();
@@ -35,24 +41,70 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
-    public FlightReservationResponseDTO booking(FlightPayloadDTO payload) throws InvalidRoomException, DateFormatException, InvalidEmailException, WrongIntervalDateException, InvalidPaymentMethodException, InvalidRoomAmountException, InexistentDestinationException, IOException, InexistentHotelErrorException, BookingErrorException, InexistentFlightErrorException, FlightReservationErrorException {
+    public List<FlightDTO> getAllFlights() throws IOException {
+        return flightRepository.getAll();
+    }
+
+    @Override
+    public void validateParams(Map<String, String> params) throws DateFormatException, WrongIntervalDateException, IOException, InexistentDestinationException, MissingFieldsInSearchFlightException {
+
+        //Validate that the 4 parameters are indicated in the query
+        if(!params.containsKey("dateFrom") || !params.containsKey("dateTo") || !params.containsKey("destination")
+                || !params.containsKey("origin"))
+            throw new MissingFieldsInSearchFlightException();
+        String dateFrom = params.get("dateFrom");
+        String dateTo = params.get("dateTo");
+        String destination = params.get("destination");
+        String origin = params.get("origin");
+
+        //Validate format of both dates
+        if(!DateUtil.validateDate(params.get("dateFrom")) ||
+                !DateUtil.validateDate(params.get("dateTo")))
+            throw new DateFormatException();
+
+        //Validate that dateFrom is previous of dateTo
+        if(!DateUtil.convertToDate(dateFrom).isBefore(DateUtil.convertToDate(dateTo)))
+            throw new WrongIntervalDateException();
+
+        //Validate that the origin and destination city are valid
+        if(!flightRepository.destinationExist(destination))
+            throw new InexistentDestinationException(destination);
+        if(!flightRepository.destinationExist(origin))
+            throw new InexistentDestinationException(origin);
+
+    }
+
+    /*
+    This method receives a payload with the reservation information and return the reservation completed
+     */
+    @Override
+    public FlightReservationResponseDTO booking(FlightPayloadDTO payload) throws InvalidRoomException, DateFormatException, InvalidEmailException, WrongIntervalDateException, InvalidPaymentMethodException, InvalidRoomAmountException, InexistentDestinationException, IOException, BookingErrorException, InexistentFlightErrorException, FlightReservationErrorException {
+        //Validate that every fields in payload are corrects
         validatePayload(payload);
+
+        //Check that the flight asked are available for the indicated dates and conditions
         checkBooking(payload);
+
         FlightReservationResponseDTO flightReservationResponseDTO = new FlightReservationResponseDTO();
         flightReservationResponseDTO.setFlightReservation(payload.getFlightReservation());
         flightReservationResponseDTO.setUserName(payload.getUserName());
+
+        //Calculate the price
         double price = calculatePrice(payload);
         flightReservationResponseDTO.setAmount(price);
-        flightReservationResponseDTO.setInterest(calculateInterest(payload.getFlightReservation().getPaymentMethod()));
+
+        //Calculate the interests
+        flightReservationResponseDTO.setInterest(InterestUtil.calculateInterest(payload.getFlightReservation().getPaymentMethod()));
         double total = flightReservationResponseDTO.getAmount() * (1 + flightReservationResponseDTO.getInterest());
         flightReservationResponseDTO.setTotal(Math.round(total * 100d) / 100d);
         flightReservationResponseDTO.setStatusCode(new StatusDTO(200, "El proceso termino satisfactoriamente"));
+
         return flightReservationResponseDTO;
     }
 
     @Override
     public void validatePayload(FlightPayloadDTO payload) throws DateFormatException, WrongIntervalDateException, IOException, InexistentDestinationException, InvalidEmailException, InvalidPaymentMethodException {
-// datefrom and dateto validation
+        // datefrom and dateto validation
         if(!DateUtil.validateDate(payload.getFlightReservation().getDateFrom())
                 || !DateUtil.validateDate(payload.getFlightReservation().getDateTo()))
             throw new DateFormatException();
@@ -72,87 +124,40 @@ public class FlightServiceImpl implements FlightService {
             throw new InvalidEmailException();
 
         //payment validation
-        interestValidation(payload.getFlightReservation().getPaymentMethod().getType(),
+        InterestUtil.validateInterest(payload.getFlightReservation().getPaymentMethod().getType(),
                 payload.getFlightReservation().getPaymentMethod().getDues());
     }
 
     @Override
-    public void interestValidation(String type, int dues) throws InvalidPaymentMethodException {
-        if(!type.equalsIgnoreCase("DEBIT") && !type.equalsIgnoreCase("CREDIT"))
-            throw new InvalidPaymentMethodException(type);
-        //I consider max dues = 24
-        if(type.equalsIgnoreCase("DEBIT") && dues != 1 || (
-                type.equalsIgnoreCase("CREDIT") && (dues > 24 || dues < 1)
-        ))
-            throw new InvalidPaymentMethodException(type, dues);
-    }
-
-    @Override
-    public double calculatePrice(FlightPayloadDTO payload) throws IOException, InexistentHotelErrorException, InexistentFlightErrorException {
+    public double calculatePrice(FlightPayloadDTO payload) throws IOException, InexistentFlightErrorException {
+        //Obtain from database, the flight asked
         FlightDTO flight = flightRepository.getFlightByNumberAndRoute(payload.getFlightReservation().getFlightNumber(),
                 payload.getFlightReservation().getOrigin(), payload.getFlightReservation().getDestination());
-        LocalDate dateTo = DateUtil.convertToDate(payload.getFlightReservation().getDateTo());
-        LocalDate dateFrom = DateUtil.convertToDate(payload.getFlightReservation().getDateFrom());
-        int days = (int) ChronoUnit.DAYS.between(dateFrom, dateTo);
-        return days * flight.getPrice() * payload.getFlightReservation().getSeats();
+
+        return flight.getPrice() * payload.getFlightReservation().getSeats();
     }
 
     @Override
-    public double calculateInterest(PaymentMethodDTO paymentMethod) {
-        if(paymentMethod.getType().equalsIgnoreCase("DEBIT"))
-            return 0;
-        else{
-            if(paymentMethod.getDues()<= 3)
-                return 0.05;
-            if(paymentMethod.getDues()<=6)
-                return 0.1;
-            if(paymentMethod.getDues()<=12)
-                return 0.15;
-            else
-                return 0.2;
-        }
-    }
+    public void checkBooking(FlightPayloadDTO payload) throws IOException, FlightReservationErrorException, InexistentFlightErrorException {
 
-    @Override
-    public void checkBooking(FlightPayloadDTO payload) throws IOException, InexistentHotelErrorException, FlightReservationErrorException, InexistentFlightErrorException {
+        //Obtain in some variables some important information from payload
         String cod = payload.getFlightReservation().getFlightNumber();
         String destination = payload.getFlightReservation().getDestination();
         String origin = payload.getFlightReservation().getOrigin();
-        FlightDTO flight = flightRepository.getFlightByNumberAndRoute(cod, origin, destination);
         LocalDate dateFrom = DateUtil.convertToDate(payload.getFlightReservation().getDateFrom());
         LocalDate dateTo = DateUtil.convertToDate(payload.getFlightReservation().getDateTo());
+        String seatType = payload.getFlightReservation().getSeatType();
 
+        //Search in database the flight asked
+        FlightDTO flight = flightRepository.getFlightByNumberAndRoute(cod, origin, destination);
+
+        //Validate if the flight is available for the indicated dates
         if(dateFrom.isBefore(DateUtil.convertToDate(flight.getDateFrom())) ||
                 dateTo.isAfter(DateUtil.convertToDate(flight.getDateTo())) ||
-                !flight.getOrigin().equalsIgnoreCase(origin))
+                !flight.getOrigin().equalsIgnoreCase(origin)
+                || !flight.getSeatType().equalsIgnoreCase(seatType))
             throw new FlightReservationErrorException(cod, destination, payload.getFlightReservation().getDateFrom(),
-                    payload.getFlightReservation().getDateTo(), origin);
+                    payload.getFlightReservation().getDateTo(), origin, seatType);
     }
 
-    @Override
-    public List<FlightDTO> getAllFlights() throws IOException {
-        return flightRepository.getAll();
-    }
-
-    @Override
-    public void validateParams(Map<String, String> params) throws DateFormatException, WrongIntervalDateException, IOException, InexistentDestinationException, MissingFieldsInSearchFlightException {
-
-        if(!params.containsKey("dateFrom") || !params.containsKey("dateTo") || !params.containsKey("destination")
-            || !params.containsKey("origin"))
-            throw new MissingFieldsInSearchFlightException();
-        String dateFrom = params.get("dateFrom");
-        String dateTo = params.get("dateTo");
-        String destination = params.get("destination");
-        String origin = params.get("origin");
-        if(!DateUtil.validateDate(params.get("dateFrom")) ||
-                !DateUtil.validateDate(params.get("dateTo")))
-            throw new DateFormatException();
-        if(!DateUtil.convertToDate(dateFrom).isBefore(DateUtil.convertToDate(dateTo)))
-            throw new WrongIntervalDateException();
-        if(!flightRepository.destinationExist(destination))
-            throw new InexistentDestinationException(destination);
-        if(!flightRepository.destinationExist(origin))
-            throw new InexistentDestinationException(origin);
-
-    }
 }

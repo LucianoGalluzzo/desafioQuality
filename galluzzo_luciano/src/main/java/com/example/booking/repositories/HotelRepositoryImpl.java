@@ -1,6 +1,6 @@
 package com.example.booking.repositories;
 
-import com.example.booking.config.EmptySearchException;
+import com.example.booking.config.EmptySearchHotelException;
 import com.example.booking.config.InexistentHotelErrorException;
 import com.example.booking.dtos.HotelDTO;
 import com.example.booking.utils.DateUtil;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -71,7 +70,7 @@ public class HotelRepositoryImpl implements HotelRepository{
     }
 
     @Override
-    public List<HotelDTO> getHotelsFiltered(LocalDate dateFrom, LocalDate dateTo, String destination) throws IOException, EmptySearchException {
+    public List<HotelDTO> getHotelsFiltered(LocalDate dateFrom, LocalDate dateTo, String destination) throws IOException, EmptySearchHotelException {
         loadDataBase();
         List<HotelDTO> filteredList = new ArrayList<>();
         filteredList = dataBase.stream().filter(hotelDTO -> hotelDTO.getDestination().equalsIgnoreCase(destination)
@@ -79,7 +78,7 @@ public class HotelRepositoryImpl implements HotelRepository{
                 && !dateTo.isAfter(DateUtil.convertToDate(hotelDTO.getDateTo()))).
                 collect(Collectors.toList());
         if(filteredList.isEmpty())
-            throw new EmptySearchException();
+            throw new EmptySearchHotelException();
         return filteredList;
     }
 

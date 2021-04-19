@@ -1,12 +1,13 @@
 {
   "userName" : "seba_gonzalez@unmail.com",
-  "booking" : {
+  "flightReservation" : {
     "dateFrom" : "10/02/2021",
-    "dateTo" : "23/02/2021",
-    "destination" : "Buenos Aires",
-    "hotelCode" : "HB-0001",
-    "peopleAmount" : 1,
-    "roomType" : "SINGLE",
+    "dateTo" : "15/02/2021",
+    "origin" : "Buenos Aires",
+    "destination": "Puerto Iguazú",
+    "flightNumber" : "BAPI-1235",
+    "seats" : 2,
+    "seatType" : "ECONOMY",
     "people" : [
       {
         "dni" : "12345678",

@@ -1,8 +1,8 @@
 package com.example.booking.config;
 
-public class MissingFiledsInSearchHotelException extends Exception{
+public class MissingFieldsInSearchHotelException extends Exception{
 
-    public MissingFiledsInSearchHotelException(){
+    public MissingFieldsInSearchHotelException(){
             super("Some fields are missing in search. Required: 'dateFrom', 'dateTo' and 'destination'");
     }
 }
