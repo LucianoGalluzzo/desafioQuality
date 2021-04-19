@@ -1,0 +1,12 @@
+[
+  {
+    "cod": "HB-0001",
+    "name": "Hotel Bristol",
+    "destination": "Buenos Aires",
+    "roomType": "Single",
+    "price": 5435,
+    "dateFrom": "10/02/2021",
+    "dateTo": "19/03/2021",
+    "booked": false
+  }
+]

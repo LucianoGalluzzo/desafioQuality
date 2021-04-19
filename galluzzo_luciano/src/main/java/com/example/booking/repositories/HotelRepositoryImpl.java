@@ -1,17 +1,16 @@
 package com.example.booking.repositories;
 
 import com.example.booking.config.EmptySearchException;
+import com.example.booking.config.InexistentHotelErrorException;
 import com.example.booking.dtos.HotelDTO;
 import com.example.booking.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -84,5 +83,45 @@ public class HotelRepositoryImpl implements HotelRepository{
         return filteredList;
     }
 
+    @Override
+    public HotelDTO getHotelByCodAndDestination(String cod, String destination) throws IOException, InexistentHotelErrorException {
+        loadDataBase();
+        Optional<HotelDTO> hotel = dataBase.stream().filter(hotelDTO -> hotelDTO.getCod().equals(cod)
+            && hotelDTO.getDestination().equalsIgnoreCase(destination)).findFirst();
+        if(hotel.isEmpty())
+            throw new InexistentHotelErrorException(cod, destination);
+        return hotel.get();
+    }
 
+    @Override
+    public void setReservation(String cod) throws IOException {
+        Optional<HotelDTO> hotel = dataBase.stream().filter(hotelDTO -> hotelDTO.getCod().equals(cod)).findFirst();
+        if(hotel.isPresent()){
+            HotelDTO hotelDTO = hotel.get();
+            dataBase.get(dataBase.indexOf(hotelDTO)).setBooked(true);
+        }
+        updateDB();
+
+    }
+
+    @Override
+    public void updateDB() throws IOException {
+        FileWriter writer = new FileWriter(path);
+        String separator = ",";
+        String collect = "Código Hotel,Nombre,Lugar/Ciudad,Tipo de Habitación,Precio por noche,Disponible Desde,Disponible hasta,Reservado\n";
+        String booked = "NO";
+        for(HotelDTO hotelDTO: dataBase) {
+            if(hotelDTO.isBooked())
+                booked = "SI";
+            else
+                booked = "NO";
+
+            collect += hotelDTO.getCod() + separator + hotelDTO.getName() + separator +
+                    hotelDTO.getDestination() + separator + hotelDTO.getRoomType() + separator + "$" +
+                    hotelDTO.getPrice() + separator + hotelDTO.getDateFrom() + separator + hotelDTO.getDateTo() +
+                    separator + booked + "\n";
+        }
+        writer.write(collect);
+        writer.close();
+    }
 }

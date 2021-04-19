@@ -43,4 +43,8 @@ public class HotelDTO {
             this.booked = false;
     }
 
+    public HotelDTO(String cod){
+        this.cod = cod;
+    }
+
 }
