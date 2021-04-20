@@ -12,7 +12,7 @@ Para eso debemos hacer un **GET** con la siguiente ruta `/api/v1/hotels` Aca obt
 
 Para eso debemos hacer un **GET** con la siguiente ruta `/api/v1/hotels?dateFrom=DD/MM/YYYY&dateTo=DD/MM/YYYY&destination=cityName` Aca obtendremos una lista solamente de los hoteles disponibles que cumplan con esas condiciones
 
-- Reservar una habitación
+- Reservar una habitación:
 
 Para eso debemos hacer un **POST** a la siguiente ruta `/api/v1/booking` y enviar en un json un payload como el del siguiente ejemplo:
 ```json
@@ -102,7 +102,7 @@ Para eso debemos hacer un **GET** con la siguiente ruta `/api/v1/flights` Aca ob
 
 Para eso debemos hacer un **GET** con la siguiente ruta `/api/v1/flights?dateFrom=DD/MM/YYYY&dateTo=DD/MM/YYYY&origin=cityName&destination=cityName`
 
-- Reservar un vuelo
+- Reservar un vuelo:
 
 Para eso debemos hacer un **POST** a la siguiente ruta `/api/v1/flight-reservation` y enviar en un json un payload como el del siguiente ejemplo
 ```json
@@ -194,3 +194,18 @@ Tanto en al reserva de vuelos como de hoteles podemos obtener alguna de éstas e
 - Habitación invalida (en el caso de hoteles)
 - Tipo de pago invalido
 - El hotel o vuelo no tiene disponibilidad para la fecha y condiciones solicitadas
+
+Además. en la consulta de hoteles o vuelos podemos obtener alguna de las siguiente excepciones:
+- Formato de fecha incorrecto
+- La busqueda no obtuvo ningun resultado
+- Destino inexistente
+- La fecha de fin debe ser mayor a la fecha de inicio
+- Faltan parametros en la búsqueda
+
+**TEST COVERAGE**
+
+El código tiene una cobertura del `80%` de las líneas. Las clases testeadas son las siguientes:
+- Flight/Hotel Controller: Se prueban unitariamente los métodos del controller haciendo un mock al service
+- Flight/Hotel Service: Se prueban unitariamente los métodos del service haciendo un mock al repositorio (éstas clases utilizan otras clases utils que no están mockeadas ya que no se instancian y no figuran en el constructor)
+- Flights/Hotel Repository: Se prueban unitariamente los métodos del repository
+- InterestUtil: Se prueban unitariamente los métodos de la clase utilitaria que sirve para validar los intereses del método de pago.
