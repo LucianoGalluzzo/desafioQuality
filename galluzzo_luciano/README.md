@@ -15,7 +15,7 @@ Para eso debemos hacer un **GET** con la siguiente ruta "/api/v1/hotels?dateFrom
 - Reservar una habitación
 
 Para eso debemos hacer un **POST** a la siguiente ruta "/api/v1/booking" y enviar en un json un payload como el del siguiente ejemplo:
-
+```json
 {
   "userName" : "seba_gonzalez@unmail.com",
   "booking" : {
@@ -48,9 +48,9 @@ Para eso debemos hacer un **POST** a la siguiente ruta "/api/v1/booking" y envia
     }
   }
 }
-
+```
 Como respuesta obtendremos un json con los datos de la reserva como en éste ejemplo:
-
+```json
 {
     "userName": "seba_gonzalez@unmail.com",
     "amount": 70655.0,
@@ -90,5 +90,5 @@ Como respuesta obtendremos un json con los datos de la reserva como en éste eje
         "message": "El proceso termino satisfactoriamente"
     }
 }
-
+```
 Aca podemos obtener excepciones si enviamos un email con formato incorrecto, si no encuentra hoteles con esas caracteristicas, si el destino no existe, etc.
