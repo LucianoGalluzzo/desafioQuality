@@ -14,10 +14,16 @@ import java.util.regex.Pattern;
 public class EmailUtil {
 
     public static boolean validateEmails(String email, List<PeopleDTO> peopleEmails){
+
+        //Definition of regex
         String regex = "^(.+)@(.+)$";
         boolean match = true;
         Pattern pattern = Pattern.compile(regex);
+
+        //First of all, I checked if UserName email is valid
         Matcher matcher = pattern.matcher(email);
+
+        //Then, I checked if any people of the list have an invalid email
         if(matcher.matches()){
             for (int i = 0; i < peopleEmails.size(); i++) {
                 if(!pattern.matcher(peopleEmails.get(i).getMail()).matches())

@@ -33,8 +33,8 @@ public class HotelServiceImpl implements HotelService{
     }
 
     /*
-    This method receives the params in a Hashmap, is there aren´t any param, calls to a method which return the
-    whole hotel list, if there are some param, calls to a method to validate the params and then obtains the
+    This method receives params in a Hashmap, is there aren´t any param, calls to a method which return the
+    whole hotel list, if there are some param, calls to a method to validate them and then obtains the
     filtered list
      */
     @Override
@@ -170,7 +170,7 @@ public class HotelServiceImpl implements HotelService{
     @Override
     public void checkBooking(HotelPayloadDTO payload) throws IOException, InexistentHotelErrorException, BookingErrorException {
 
-        //Obtain in some variables some important information from payload
+        //Obtain in some variables important information from payload
         String cod = payload.getBooking().getHotelCode();
         String destination = payload.getBooking().getDestination();
         String room = payload.getBooking().getRoomType();

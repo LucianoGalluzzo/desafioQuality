@@ -4,7 +4,6 @@ import com.example.booking.config.*;
 import com.example.booking.dtos.HotelBookingResponseDTO;
 import com.example.booking.dtos.HotelDTO;
 import com.example.booking.dtos.HotelPayloadDTO;
-import com.example.booking.dtos.PaymentMethodDTO;
 
 import java.io.IOException;
 import java.util.List;

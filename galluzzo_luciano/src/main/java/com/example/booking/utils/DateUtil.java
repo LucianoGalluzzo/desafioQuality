@@ -16,12 +16,6 @@ public class DateUtil {
     }
 
     public static boolean validateDate(String strDate){
-        /*boolean res;
-        if(date.length() != 10)
-            return false;
-        if(date.charAt(2) != '/' || date.charAt(5) != '/' || date.charAt(8) != '/')
-            return false;
-        String[] dateSplit = date.split("/");*/
 
         String dateFormat = "dd/MM/uuuu";
 
