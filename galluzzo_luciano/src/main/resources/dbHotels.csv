@@ -1,7 +1,7 @@
 Código Hotel,Nombre,Lugar/Ciudad,Tipo de Habitación,Precio por noche,Disponible Desde,Disponible hasta,Reservado
 CH-0002,Cataratas Hotel,Puerto Iguazú,Double,$6300,10/02/2021,20/03/2021,NO
 CH-0003,Cataratas Hotel 2,Puerto Iguazú,Triple,$8200,10/02/2021,23/03/2021,NO
-HB-0001,Hotel Bristol,Buenos Aires,Single,$5435,10/02/2021,19/03/2021,SI
+HB-0001,Hotel Bristol,Buenos Aires,Single,$5435,10/02/2021,19/03/2021,NO
 BH-0002,Hotel Bristol 2,Buenos Aires,Double,$7200,12/02/2021,17/04/2021,NO
 SH-0002,Sheraton,Tucumán,Double,$5790,17/04/2021,23/05/2021,NO
 SH-0001,Sheraton 2,Tucumán,Single,$4150,02/01/2021,19/02/2021,NO

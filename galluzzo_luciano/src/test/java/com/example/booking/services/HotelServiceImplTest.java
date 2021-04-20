@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -44,6 +45,7 @@ public class HotelServiceImplTest {
                         });
     }
 
+    @DisplayName("Get All Hotels")
     @Test
     void getAllHotels() throws IOException, InexistentDestinationException, MissingFieldsInSearchHotelException, DateFormatException, WrongIntervalDateException, EmptySearchHotelException {
         List<HotelDTO> mockHotels=
@@ -58,6 +60,7 @@ public class HotelServiceImplTest {
         Assertions.assertEquals(mockHotels, responseHotels);
     }
 
+    @DisplayName("Get filtered hotels")
     @Test
     void getHotelsByParamsTest() throws IOException, InexistentDestinationException, MissingFieldsInSearchHotelException, DateFormatException, WrongIntervalDateException, EmptySearchHotelException {
         List<HotelDTO> mockHotels=
@@ -78,6 +81,7 @@ public class HotelServiceImplTest {
         Assertions.assertEquals(mockHotels, responseHotels);
     }
 
+    @DisplayName("Missing params")
     @Test
     void validateParamsMissingFieldsTest(){
 
@@ -93,6 +97,7 @@ public class HotelServiceImplTest {
 
     }
 
+    @DisplayName("Invalid format date")
     @Test
     void validateParamsInvalidFormatDateTest(){
 
@@ -113,6 +118,7 @@ public class HotelServiceImplTest {
 
     }
 
+    @DisplayName("Wrong interval date")
     @Test
     void validateParamsWrongIntervalTest(){
 
@@ -132,6 +138,7 @@ public class HotelServiceImplTest {
 
     }
 
+    @DisplayName("Destination not exist")
     @Test
     void validateParamsInexistentDestinationTest() throws IOException {
 
@@ -151,12 +158,14 @@ public class HotelServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Calculate price")
     @Test
     void calculatePriceTest() throws IOException, InexistentHotelErrorException {
         when(hotelRepository.getHotelByCodAndDestination(any(), any())).thenReturn(hotelFixture());
         Assertions.assertEquals(81900, hotelService.calculatePrice(mockPayload));
     }
 
+    @DisplayName("Invalid room type")
     @Test
     void roomValidationInvalidTypeTest(){
         String type = "KING ROOM";
@@ -169,6 +178,7 @@ public class HotelServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Invalid people amount for room")
     @Test
     void roomValidationInvalidPeopleAmountTest(){
         String type = "DOUBLE";
@@ -184,6 +194,7 @@ public class HotelServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Invalid email in UserName")
     @Test
     void validatePayloadInvalidUserNameEmailTest() throws IOException {
         String mockEmail = "lucianogalluzzomercadolibre.com";
@@ -199,6 +210,7 @@ public class HotelServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Invalid email in People list")
     @Test
     void validatePayloadInvalidPeopleEmailTest() throws IOException {
         String mockEmail = "lucianogalluzzomercadolibre.com";
@@ -214,6 +226,7 @@ public class HotelServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Hotel already booked")
     @Test
     void checkBookingHotelAlreadyBookedTest() throws IOException, InexistentHotelErrorException {
         HotelDTO mockHotel = hotelFixtureAlreadyBooked();
@@ -231,6 +244,7 @@ public class HotelServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Book hotel")
     @Test
     void bookingHotelTest() throws IOException, InexistentHotelErrorException, InvalidEmailException, DateFormatException, InvalidRoomAmountException, WrongIntervalDateException, InvalidPaymentMethodException, InexistentDestinationException, InvalidRoomException, BookingErrorException {
 

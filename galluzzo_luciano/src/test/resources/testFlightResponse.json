@@ -1,8 +1,8 @@
 {
   "userName": "seba_gonzalez@unmail.com",
-  "amount": 65000.0,
+  "amount": 13000.0,
   "interest": 0.1,
-  "total": 71500.0,
+  "total": 14300.0,
   "flightReservation": {
     "dateFrom": "10/02/2021",
     "dateTo": "15/02/2021",

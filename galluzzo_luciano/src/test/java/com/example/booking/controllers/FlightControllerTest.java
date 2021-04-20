@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,7 @@ public class FlightControllerTest {
                         });
     }
 
+    @DisplayName("Get All Flights")
     @Test
     void getAllFlightsTest() throws DateFormatException, IOException, WrongIntervalDateException, InexistentDestinationException, EmptySearchFlightException, MissingFieldsInSearchFlightException {
         ResponseEntity<List<FlightDTO>> mockResponse = new ResponseEntity<List<FlightDTO>>(mockFlights, HttpStatus.OK);
@@ -53,6 +55,7 @@ public class FlightControllerTest {
         Assertions.assertEquals(mockResponse, flightController.getFlights(new HashMap<>()));
     }
 
+    @DisplayName("Reserve Flight")
     @Test
     void reserveFlightTest() throws IOException, DateFormatException, InvalidRoomException, InexistentDestinationException, BookingErrorException, WrongIntervalDateException, InvalidEmailException, InvalidPaymentMethodException, InvalidRoomAmountException, FlightReservationErrorException, InexistentFlightErrorException, InexistentHotelErrorException {
         FlightPayloadDTO mockPayload =

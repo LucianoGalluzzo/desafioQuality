@@ -6,6 +6,7 @@ import com.example.booking.dtos.HotelDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -27,6 +28,7 @@ public class HotelRepositoryImplTest {
         hotelRepository = new HotelRepositoryImpl("src/test/resources/testHotels.csv");
     }
 
+    @DisplayName("Get All Hotels")
     @Test
     void getAllTest() throws IOException {
         List<HotelDTO> mockHotels = objectMapper.readValue(
@@ -36,6 +38,7 @@ public class HotelRepositoryImplTest {
         Assertions.assertEquals(mockHotels, hotelRepository.getAll());
     }
 
+    @DisplayName("Get Filtered Hotels")
     @Test
     void getHotelsFilteredTest() throws IOException, EmptySearchHotelException {
         List<HotelDTO> mockHotels = objectMapper.readValue(
@@ -48,6 +51,7 @@ public class HotelRepositoryImplTest {
         Assertions.assertEquals(mockHotels, hotelRepository.getHotelsFiltered(dateFrom, dateTo, destination));
     }
 
+    @DisplayName("Not found hotels")
     @Test
     void getHotelsNoResultsTest(){
         LocalDate dateFrom = LocalDate.of(2020, 02, 10);
@@ -64,18 +68,21 @@ public class HotelRepositoryImplTest {
 
     }
 
+    @DisplayName("Destination exist")
     @Test
     void destinationExistTest() throws IOException {
 
         Assertions.assertTrue(hotelRepository.destinationExist("Buenos Aires"));
     }
 
+    @DisplayName("Destination not exist")
     @Test
     void destinationNoExistTest() throws IOException {
 
         Assertions.assertFalse(hotelRepository.destinationExist("Montevideo"));
     }
 
+    @DisplayName("Find hotel by cod")
     @Test
     void getHotelByCodAndDestinationTest() throws IOException, InexistentHotelErrorException {
         HotelDTO mockHotel = new HotelDTO("CH-0002", "Cataratas Hotel", "Puerto Iguazú", "Doble", 6300, "10/02/2021",
@@ -84,6 +91,7 @@ public class HotelRepositoryImplTest {
         Assertions.assertEquals(mockHotel, responseHotel);
     }
 
+    @DisplayName("Hotel not exist")
     @Test
     void hotelNotExistedException(){
         String cod = "XXXX";

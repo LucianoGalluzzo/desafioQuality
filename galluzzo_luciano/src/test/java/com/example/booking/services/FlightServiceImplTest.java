@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -42,6 +43,7 @@ public class FlightServiceImplTest {
     }
 
 
+    @DisplayName("Get All Flights")
     @Test
     void getAllFlights() throws IOException, InexistentDestinationException, DateFormatException, WrongIntervalDateException, EmptySearchFlightException, MissingFieldsInSearchFlightException {
         List<FlightDTO> mockFlights=
@@ -56,6 +58,7 @@ public class FlightServiceImplTest {
         Assertions.assertEquals(mockFlights, responseFlights);
     }
 
+    @DisplayName("Get filteres Flights")
     @Test
     void getFlightsByParamsTest() throws IOException, InexistentDestinationException, DateFormatException, WrongIntervalDateException, EmptySearchFlightException, MissingFieldsInSearchFlightException {
         List<FlightDTO> mockFlights=
@@ -77,6 +80,7 @@ public class FlightServiceImplTest {
         Assertions.assertEquals(mockFlights, responseFlights);
     }
 
+    @DisplayName("Missing params")
     @Test
     void validateParamsMissingFieldsTest(){
 
@@ -92,6 +96,7 @@ public class FlightServiceImplTest {
 
     }
 
+    @DisplayName("Invalid format date")
     @Test
     void validateParamsInvalidFormatDateTest(){
 
@@ -113,6 +118,7 @@ public class FlightServiceImplTest {
 
     }
 
+    @DisplayName("Wrong interval date")
     @Test
     void validateParamsWrongIntervalTest(){
 
@@ -133,6 +139,7 @@ public class FlightServiceImplTest {
 
     }
 
+    @DisplayName("Inexistent destination")
     @Test
     void validateParamsInexistentDestinationTest() throws IOException {
 
@@ -153,12 +160,14 @@ public class FlightServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Calculate price")
     @Test
     void calculatePriceTest() throws IOException, InexistentFlightErrorException {
         when(flightRepository.getFlightByNumberAndRoute(any(), any(), any())).thenReturn(flightFixture());
-        Assertions.assertEquals(65000, flightService.calculatePrice(mockPayload));
+        Assertions.assertEquals(13000, flightService.calculatePrice(mockPayload));
     }
 
+    @DisplayName("Invalid email in UserName")
     @Test
     void validatePayloadInvalidUserNameEmailTest() throws IOException {
         String mockEmail = "lucianogalluzzomercadolibre.com";
@@ -174,6 +183,7 @@ public class FlightServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Invalid email in People list")
     @Test
     void validatePayloadInvalidPeopleEmailTest() throws IOException {
         String mockEmail = "lucianogalluzzomercadolibre.com";
@@ -189,6 +199,7 @@ public class FlightServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Interval date in reservation is not valid")
     @Test
     void checkReservationNotValidIntervalTest() throws IOException, InexistentFlightErrorException {
         FlightDTO mockFlight = flightFixtureDifferentDates();
@@ -208,6 +219,7 @@ public class FlightServiceImplTest {
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @DisplayName("Reserve a Flight")
     @Test
     void flightReservationTest() throws IOException, InexistentFlightErrorException, DateFormatException, InvalidRoomAmountException, InvalidRoomException, InexistentDestinationException, BookingErrorException, InvalidEmailException, InvalidPaymentMethodException, WrongIntervalDateException, FlightReservationErrorException {
         FlightReservationResponseDTO mockResponse =

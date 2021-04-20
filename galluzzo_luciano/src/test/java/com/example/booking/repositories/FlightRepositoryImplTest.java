@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -26,6 +27,7 @@ public class FlightRepositoryImplTest {
 
     }
 
+    @DisplayName("Get All Flights")
     @Test
     void getAllTest() throws IOException {
         List<FlightDTO> mockFlights = objectMapper.readValue(
@@ -36,6 +38,7 @@ public class FlightRepositoryImplTest {
         Assertions.assertEquals(mockFlights, flightRepository.getAll());
     }
 
+    @DisplayName("Get filtered Flights")
     @Test
     void getFlightsFilteredTest() throws IOException, EmptySearchFlightException {
         List<FlightDTO> mockFlights = objectMapper.readValue(
@@ -49,6 +52,7 @@ public class FlightRepositoryImplTest {
         Assertions.assertEquals(mockFlights, flightRepository.getFlightsFiltered(dateFrom, dateTo, origin, destination));
     }
 
+    @DisplayName("Not found flights")
     @Test
     void getFlightsNoResultsTest(){
         LocalDate dateFrom = LocalDate.of(2021, 02, 10);
@@ -66,18 +70,21 @@ public class FlightRepositoryImplTest {
 
     }
 
+    @DisplayName("Destination exist")
     @Test
     void destinationExistTest() throws IOException {
 
         Assertions.assertTrue(flightRepository.destinationExist("Buenos Aires"));
     }
 
+    @DisplayName("Destination not exist")
     @Test
     void destinationNoExistTest() throws IOException {
 
         Assertions.assertFalse(flightRepository.destinationExist("Montevideo"));
     }
 
+    @DisplayName("Find flight by cod")
     @Test
     void getFlightByCodAndRouteTest() throws IOException, InexistentFlightErrorException {
         FlightDTO mockFlight = new FlightDTO("BAPI-1235", "Buenos Aires", "Puerto Iguazú", "Economy", 6500, "10/02/2021",
@@ -86,6 +93,7 @@ public class FlightRepositoryImplTest {
         Assertions.assertEquals(mockFlight, responseFlight);
     }
 
+    @DisplayName("Flight not exist")
     @Test
     void flightNotExistedException(){
         String number = "XXXX-1235";
