@@ -2,7 +2,7 @@ LUCIANO GALLUZZO - DESAFIO QUALITY
 
 El proyecto cuenta con 2 controladores `HotelController` y `FlightController`
 
-**En HotelController podemos realizar lo siguiente**
+**En HotelController podemos realizar lo siguiente:**
 
 - Obtener una lista de todos los hoteles:
 
@@ -92,7 +92,7 @@ Como respuesta obtendremos un json con los datos de la reserva como en éste eje
 }
 ```
 
-**En FlightController podemos realizar lo siguiente**
+**En FlightController podemos realizar lo siguiente:**
 
 - Obtener una lista de todos los vuelos:
 
